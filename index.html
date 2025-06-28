@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillForge AI | Platform Vision</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as a narrative journey, guiding the user from the high-level vision to the tangible outcomes. It uses a top-down thematic structure: 1. Hero (The Vision): To immediately establish the brand identity. 2. Learner Journey: An interactive timeline to show the user's progression, making the abstract process feel concrete and personal. This combines onboarding, learning, and skill tracking from the report. 3. Platform Features: A tab-based exploration hub for core modules (Projects, Mentorship, Community, Skill Tracker). This allows non-linear exploration of the platform's tools. 4. Career Ecosystem: A data-driven section focusing on job readiness, using a dynamic chart to visualize growth and success. 5. Employer Portal glimpse. This structure was chosen to tell a compelling story about the platform's value, transforming a detailed spec sheet into an engaging and understandable interactive experience, rather than a simple list of features. -->
+    <!-- Visualization & Content Choices: 1. Learner Journey (Timeline): Report Info: Onboarding, Learning Paths, Skill Tracker. Goal: Show Change/Process. Viz: HTML/CSS timeline. Interaction: Click to reveal details. Justification: Visually represents progression over time, more engaging than text. 2. Career Meter: Report Info: Job Readiness, Skill Gaps. Goal: Compare/Inform. Viz: Chart.js Radar Chart. Interaction: Slider updates chart data. Justification: Effectively shows multi-dimensional skill assessment and improvement. 3. Project Cards/Feature Modals: Report Info: Project Hub, Chatbot, Resume Builder. Goal: Organize/Inform. Viz: Styled HTML cards/modals. Interaction: Click to expand/view details. Justification: Organizes detailed features cleanly without cluttering the main view. 4. Skill Tracker & Gamification: Report Info: Badge Gallery, Streak Tracker. Goal: Inform/Engage. Viz: HTML/CSS grid with icons/text. Interaction: Hover for descriptions, visual feedback on streaks. Justification: Provides a tangible representation of achievement and motivation aspects. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 1.25rem;
+            left: -0.4rem;
+            width: 0.8rem;
+            height: 0.8rem;
+            border-radius: 9999px;
+            background-color: #3B82F6;
+            border: 2px solid #FEF2F2;
+        }
+        .timeline-path {
+            position: absolute;
+            top: 1.25rem;
+            left: -0.05rem;
+            width: 2px;
+            height: 100%;
+            background-color: #E5E7EB;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 640px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .tab-active {
+            border-color: #3B82F6;
+            color: #3B82F6;
+            background-color: #EFF6FF;
+        }
+        .tab-inactive {
+            border-color: transparent;
+            color: #6B7280;
+        }
+        .chat-message {
+            margin-bottom: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            max-width: 80%;
+        }
+        .chat-message.user {
+            background-color: #DBEAFE;
+            align-self: flex-end;
+            margin-left: auto;
+            text-align: right;
+        }
+        .chat-message.ai {
+            background-color: #F3F4F6;
+            align-self: flex-start;
+            margin-right: auto;
+        }
+        .hero-background {
+            background-image: radial-gradient(at 0% 0%, #E0F2FE 0%, transparent 50%), radial-gradient(at 100% 100%, #BFDBFE 0%, transparent 50%);
+        }
+        .badge-icon {
+            font-size: 3rem; /* Larger icon for badges */
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        .streak-day.completed {
+            background-color: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+        .streak-day {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            border: 1px solid #D1D5DB;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-blue-600">SkillForge AI</a>
+            <div class="hidden md:flex space-x-6 items-center">
+                <a href="#vision" class="text-stone-600 hover:text-blue-600">The Vision</a>
+                <a href="#journey" class="text-stone-600 hover:text-blue-600">Learner Journey</a>
+                <a href="#features" class="text-stone-600 hover:text-blue-600">Platform Features</a>
+                <a href="#career" class="text-stone-600 hover:text-blue-600">Career Ecosystem</a>
+            </div>
+            <a href="#start" class="hidden md:block bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors">Get Started</a>
+            <button id="mobile-menu-button" class="md:hidden text-stone-600 focus:outline-none">
+                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#vision" class="block py-2 text-stone-600 hover:text-blue-600">The Vision</a>
+            <a href="#journey" class="block py-2 text-stone-600 hover:text-blue-600">Learner Journey</a>
+            <a href="#features" class="block py-2 text-stone-600 hover:text-blue-600">Platform Features</a>
+            <a href="#career" class="block py-2 text-stone-600 hover:text-blue-600">Career Ecosystem</a>
+            <a href="#start" class="block mt-2 bg-blue-600 text-white text-center px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors">Get Started</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="vision" class="py-20 md:py-32 hero-background">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-stone-900 leading-tight">
+                    Your <span class="text-blue-600">AI-Powered</span> Journey to <br class="hidden md:block" /> Professional <span class="text-blue-600">Mastery</span>.
+                </h1>
+                <p class="mt-6 text-lg md:text-xl text-stone-700 max-w-3xl mx-auto">
+                    SkillForge AI is where cutting-edge artificial intelligence meets your career aspirations. We deliver hyper-personalized learning paths, real-world projects, and integrated career support to help you achieve measurable success in the AI/ML industry.
+                </p>
+                <div id="start" class="mt-10">
+                    <a href="#journey" class="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-transform hover:scale-105 shadow-lg">Start Your Transformation</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="journey" class="py-20 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold">The Personalized Learner Journey</h2>
+                    <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">
+                        Your path to mastery is unique. Our AI analyzes your skills, goals, and learning style to build a dynamic roadmap, ensuring every step you take is meaningful and moves you closer to your target career. Click each stage to see how it works.
+                    </p>
+                </div>
+
+                <div class="relative">
+                    <div class="timeline-path"></div>
+                    <div id="timeline-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    </div>
+                </div>
+
+                <div id="timeline-details" class="mt-8 bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-200 min-h-[100px] transition-all duration-500">
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="py-20 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold">A Rich Ecosystem of Features</h2>
+                    <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">
+                        SkillForge AI is more than just courses. It's an integrated environment with all the tools you need to learn, practice, and grow. Explore our core features designed to support every aspect of your development.
+                    </p>
+                </div>
+                
+                <div id="tabs-container" class="flex justify-center border-b border-stone-200 mb-8 flex-wrap">
+                </div>
+
+                <div id="tab-content-container" class="mt-8">
+                </div>
+            </div>
+        </section>
+
+        <section id="career" class="py-20 md:py-24">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold">The Career Ecosystem</h2>
+                    <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">
+                        Learning is just the beginning. SkillForge AI bridges the gap between education and employment with a powerful suite of career-focused tools. We help you showcase your skills, measure your job readiness, and connect with opportunities.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-200">
+                        <h3 class="text-2xl font-bold mb-2 text-center">Your Job Readiness Meter</h3>
+                        <p class="text-stone-600 mb-6 text-center">Our AI analyzes your completed projects and skills against real-time market data for your target role. This meter gives you a clear picture of your preparedness.</p>
+                        <div class="chart-container">
+                            <canvas id="careerMeterChart"></canvas>
+                        </div>
+                        <div class="mt-6 px-2">
+                            <label for="readiness-slider" class="block text-sm font-medium text-stone-600 mb-2">Simulate Your Progress:</label>
+                            <input id="readiness-slider" type="range" min="20" max="100" value="50" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-200">
+                            <h3 class="text-2xl font-bold mb-2 flex items-center justify-between">AI Resume & Portfolio Builder <span class="text-xl">📄</span></h3>
+                            <p class="text-stone-600">Auto-populate your skills and projects into ATS-friendly resume templates. Our AI rewrites bullet points for impact and provides a live preview. Then, showcase your work with embedded live demos in a stunning portfolio.</p>
+                        </div>
+                         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-200">
+                            <h3 class="text-2xl font-bold mb-2 flex items-center justify-between">Market Insights & Skill Gaps <span class="text-xl">📈</span></h3>
+                            <p class="text-stone-600">See live job postings that match your profile. Our system highlights the skills you're missing for your dream job and links you directly to the modules needed to close the gap.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        section>
+
+        <section class="py-20 md:py-24 bg-blue-600 text-white">
+             <div class="container mx-auto px-6 text-center">
+                 <h2 class="text-3xl md:text-4xl font-bold">Ready to Forge Your Future?</h2>
+                 <p class="mt-4 text-lg text-blue-100 max-w-2xl mx-auto">Join the next generation of AI talent. Start your personalized learning journey with SkillForge AI today.</p>
+                 <div class="mt-10">
+                    <a href="#" class="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-transform hover:scale-105">Get Started Now</a>
+                </div>
+             </div>
+        </section>
+    </main>
+    
+    <footer class="bg-stone-800 text-stone-300 py-12">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 SkillForge AI. All rights reserved.</p>
+            <p class="text-sm mt-2">A conceptual platform vision based on the "SkillForge AI" specification report.</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    const timelineContainer = document.getElementById('timeline-container');
+    const timelineDetailsContainer = document.getElementById('timeline-details');
+
+    const timelineData = [
+        {
+            title: "1. Onboarding & Personalization",
+            icon: "🚀",
+            content: `
+                <h3 class="text-xl md:text-2xl font-bold text-blue-600 mb-3 flex items-center">🚀 Onboarding & Personalization</h3>
+                <p class="text-stone-600">Your journey begins with a quick but powerful AI Skill Quiz. We assess your programming level, math foundation, project experience, and career goals. Based on your answers, we instantly generate a profile summary and suggest a personalized learning track. This ensures your dashboard and initial modules are perfectly aligned with you from day one.</p>
+            `
+        },
+        {
+            title: "2. Dynamic Learning Paths",
+            icon: "📚",
+            content: `
+                <h3 class="text-xl md:text-2xl font-bold text-blue-600 mb-3 flex items-center">📚 Dynamic Learning Paths</h3>
+                <p class="text-stone-600">Forget rigid curriculums. Your Learning Dashboard features collapsible modules and adaptive recommendations. As you complete modules, our AI suggests what to learn next based on skill gap analysis, with a clear explanation of 'Why this?'. You can even drag and drop to customize your path, giving you full control over your education.</p>
+            `
+        },
+        {
+            title: "3. Project-Based Application",
+            icon: "💡",
+            content: `
+                <h3 class="text-xl md:text-2xl font-bold text-blue-600 mb-3 flex items-center">💡 Project-Based Application</h3>
+                <p class="text-stone-600">Theory meets practice in the Project Hub. You'll apply your knowledge to real-world problems, from data wrangling to model deployment. Each project has a detailed view with checklist steps, code templates, and resources. An embedded code editor and peer-to-peer help chats ensure you're never stuck.</p>
+            `
+        },
+        {
+            title: "4. Skill Tracking & Gamification",
+            icon: "🏆",
+            content: `
+                <h3 class="text-xl md:text-2xl font-bold text-blue-600 mb-3 flex items-center">🏆 Skill Tracking & Gamification</h3>
+                <p class="text-stone-600">Stay motivated with our Progress & Achievements dashboard. A visual timeline shows your completed lessons and projects. Earn animated badges, track your daily activity streak, and compare your XP on a friendly leaderboard. Gamification is designed to celebrate your personal growth and milestones.</p>
+            `
+        }
+    ];
+
+    timelineData.forEach((item, index) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'relative pl-8 pb-8 timeline-item cursor-pointer';
+        itemEl.innerHTML = `
+            <div class="p-5 bg-white rounded-xl shadow border border-stone-200 hover:shadow-md hover:border-blue-300 transition-all">
+                <div class="text-4xl mb-2">${item.icon}</div>
+                <h4 class="font-bold text-lg">${item.title}</h4>
+            </div>
+        `;
+        itemEl.addEventListener('click', () => {
+            timelineDetailsContainer.innerHTML = item.content;
+            document.querySelectorAll('.timeline-item > div').forEach(el => el.classList.remove('bg-blue-50', 'border-blue-400'));
+            itemEl.querySelector('div').classList.add('bg-blue-50', 'border-blue-400');
+        });
+        timelineContainer.appendChild(itemEl);
+    });
+
+    timelineDetailsContainer.innerHTML = timelineData[0].content;
+    document.querySelector('.timeline-item > div').classList.add('bg-blue-50', 'border-blue-400');
+    
+    
+    const tabsContainer = document.getElementById('tabs-container');
+    const tabContentContainer = document.getElementById('tab-content-container');
+    
+    const tabsData = [
+        {
+            name: "Project Hub",
+            icon: "📂",
+            content: `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+                    <div class="bg-stone-100 p-6 rounded-xl border border-stone-200">
+                        <h4 class="font-bold text-lg mb-2">Build a Regex Engine</h4>
+                        <p class="text-stone-600 text-sm">Dive deep into pattern matching by building your own Regular Expression engine. Master parsing, character escaping, and efficient string manipulation. This project strengthens foundational programming and text processing skills.</p>
+                    </div>
+                    <div class="bg-stone-100 p-6 rounded-xl border border-stone-200">
+                        <h4 class="font-bold text-lg mb-2">Custom PostCSS Plugin Development</h4>
+                        <p class="text-stone-600 text-sm">Learn to create custom CSS transformations and automate styling tasks by developing your own PostCSS plugins. This project covers parsing CSS, manipulating ASTs, and building robust front-end tooling.</p>
+                    </div>
+                    <div class="bg-stone-100 p-6 rounded-xl border border-stone-200">
+                        <h4 class="font-bold text-lg mb-2">Tailwind Utility Generator</h4>
+                        <p class="text-stone-600 text-sm">Extend your favorite CSS framework! Build a utility generator to create custom Tailwind classes, manage theme systems (colors, spacing, fonts), and add responsive/pseudo-class variants for highly efficient styling.</p>
+                    </div>
+                    <div class="bg-stone-100 p-6 rounded-xl border border-stone-200">
+                        <h4 class="font-bold text-lg mb-2">CSS Optimization & Purging Tool</h4>
+                        <p class="text-stone-600 text-sm">Develop a tool to analyze and purge unused CSS classes from production builds. Learn about build processes, tree-shaking, and performance optimization to deliver lightning-fast web applications.</p>
+                    </div>
+                    <div class="bg-stone-100 p-6 rounded-xl border border-stone-200">
+                        <h4 class="font-bold text-lg mb-2">Reusable Utility Functions Library</h4>
+                        <p class="text-stone-600 text-sm">Create and organize a library of reusable helper functions for common programming tasks. Focus on clean code, modularity, and testing to build robust and maintainable software components for any project.</p>
+                    </div>
+                    <div class="bg-stone-100 p-6 rounded-xl border border-stone-200">
+                        <h4 class="font-bold text-lg mb-2">Advanced Data Visualization Toolkit</h4>
+                        <p class="text-stone-600 text-sm">Build a custom data visualization toolkit from scratch, focusing on interactive charts and dynamic updates without relying solely on existing libraries. Explore canvas rendering and data-driven animations.</p>
+                    </div>
+                </div>`
+        },
+        {
+            name: "Mentorship & Chatbot",
+            icon: "🤖",
+            content: `
+                <div class="grid grid-cols-1 gap-6 animate-fade-in">
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-200">
+                        <h3 class="text-2xl font-bold mb-4 text-center">AI Career Coach ✨</h3>
+                        <div id="chat-box" class="flex flex-col h-64 overflow-y-auto p-4 bg-stone-50 rounded-lg border border-stone-200 mb-4">
+                            <div class="chat-message ai">Hello! I'm your AI Career Coach. How can I help you today? Try asking me to "suggest a project for data science beginners" or "explain machine learning."</div>
+                        </div>
+                        <div class="flex items-center">
+                            <textarea id="chat-input" class="flex-grow p-3 rounded-l-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none h-12" placeholder="Ask me anything..."></textarea>
+                            <button id="send-chat-button" class="bg-blue-600 text-white px-6 h-12 rounded-r-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                                <span id="send-button-text">Send</span>
+                                <svg id="loading-spinner" class="animate-spin h-5 w-5 text-white ml-2 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-stone-100 p-6 rounded-xl border border-stone-200">
+                        <h4 class="font-bold text-lg mb-2">Human Mentor Matching</h4>
+                        <p class="text-stone-600 text-sm">When you need a human touch, browse profiles of available mentors. Check their expertise and availability, then book a session directly through our integrated calendar interface.</p>
+                    </div>
+                </div>`
+        },
+        {
+            name: "Community & Engagement",
+            icon: "🤝",
+            content: `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+                    <div class="bg-stone-100 p-6 rounded-xl border border-stone-200">
+                        <h4 class="font-bold text-lg mb-2">Forums & Threads</h4>
+                        <p class="text-stone-600 text-sm">Engage in topic-tagged discussions. Our system highlights unanswered questions to ensure everyone gets the help they need.</p>
+                    </div>
+                    <div class="bg-stone-100 p-6 rounded-xl border border-stone-200">
+                        <h4 class="font-bold text-lg mb-2">Group Challenges</h4>
+                        <p class="text-stone-600 text-sm">Sign up for time-boxed hackathons and sprints. Compete and collaborate with peers on exciting challenges and earn team XP.</p>
+                    </div>
+                    <div class="bg-stone-100 p-6 rounded-xl border border-stone-200">
+                        <h4 class="font-bold text-lg mb-2">Peer Pods</h4>
+                        <p class="text-stone-600 text-sm">Form small study groups. Our platform helps with scheduling and provides a private chat space for your pod to collaborate effectively.</p>
+                    </div>
+                </div>`
+        },
+        {
+            name: "Skill Tracker & Gamification",
+            icon: "🏅",
+            content: `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-200">
+                        <h3 class="text-2xl font-bold mb-4 text-center">Your Achievements & Badges</h3>
+                        <p class="text-stone-600 mb-6 text-center">Celebrate your progress! Earn unique badges for mastering skills, completing projects, and contributing to the community.</p>
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div class="flex flex-col items-center p-3 bg-stone-50 rounded-lg border border-stone-200">
+                                <span class="badge-icon">🌟</span>
+                                <p class="font-semibold text-sm">Pythonista</p>
+                                <p class="text-xs text-stone-500">Mastered Foundational Python</p>
+                            </div>
+                            <div class="flex flex-col items-center p-3 bg-stone-50 rounded-lg border border-stone-200">
+                                <span class="badge-icon">🧠</span>
+                                <p class="font-semibold text-sm">ML Architect</p>
+                                <p class="text-xs text-stone-500">Completed 3 ML Projects</p>
+                            </div>
+                            <div class="flex flex-col items-center p-3 bg-stone-50 rounded-lg border border-stone-200">
+                                <span class="badge-icon">🚀</span>
+                                <p class="font-semibold text-sm">Deployment Guru</p>
+                                <p class="text-xs text-stone-500">Deployed 1 Streamlit App</p>
+                            </div>
+                             <div class="flex flex-col items-center p-3 bg-stone-50 rounded-lg border border-stone-200">
+                                <span class="badge-icon">💡</span>
+                                <p class="font-semibold text-sm">Innovator</p>
+                                <p class="text-xs text-stone-500">Proposed a New Project Idea</p>
+                            </div>
+                            <div class="flex flex-col items-center p-3 bg-stone-50 rounded-lg border border-stone-200">
+                                <span class="badge-icon">🤝</span>
+                                <p class="font-semibold text-sm">Community Champion</p>
+                                <p class="text-xs text-stone-500">Helped 5 Peers</p>
+                            </div>
+                            <div class="flex flex-col items-center p-3 bg-stone-50 rounded-lg border border-stone-200">
+                                <span class="badge-icon">🎯</span>
+                                <p class="font-semibold text-sm">Goal Achiever</p>
+                                <p class="text-xs text-stone-500">Completed Your First Track</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-stone-200">
+                        <h3 class="text-2xl font-bold mb-4 text-center">Your Activity Streak</h3>
+                        <p class="text-stone-600 mb-6 text-center">Maintain your learning momentum! Your daily streak motivates consistent engagement.</p>
+                        <div class="flex justify-center gap-2 mb-4">
+                            <div class="streak-day completed">M</div>
+                            <div class="streak-day completed">T</div>
+                            <div class="streak-day completed">W</div>
+                            <div class="streak-day completed">T</div>
+                            <div class="streak-day completed">F</div>
+                            <div class="streak-day">S</div>
+                            <div class="streak-day">S</div>
+                        </div>
+                        <p class="text-xl font-bold text-center text-blue-600">Current Streak: <span id="current-streak">5 Days</span></p>
+                        <p class="text-center text-stone-500 mt-2">Longest Streak: 12 Days</p>
+                    </div>
+                </div>`
+        }
+    ];
+
+    tabsData.forEach((tab, index) => {
+        const tabEl = document.createElement('button');
+        tabEl.className = `px-4 py-2 text-sm md:text-base font-semibold border-b-2 mx-1 transition-colors duration-300 ${index === 0 ? 'tab-active' : 'tab-inactive'}`;
+        tabEl.innerHTML = `<span class="mr-2">${tab.icon}</span>${tab.name}`;
+        tabEl.addEventListener('click', () => {
+            document.querySelectorAll('#tabs-container button').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('tab-inactive');
+            });
+            tabEl.classList.add('tab-active');
+            tabEl.classList.remove('tab-inactive');
+            tabContentContainer.innerHTML = tab.content;
+            if (tab.name === "Mentorship & Chatbot") {
+                initChatbot(); // Initialize chatbot specific elements
+            }
+        });
+        tabsContainer.appendChild(tabEl);
+    });
+    
+    tabContentContainer.innerHTML = tabsData[0].content;
+
+    const ctx = document.getElementById('careerMeterChart').getContext('2d');
+    const initialData = {
+        labels: ['Python', 'Statistics', 'Data Wrangling', 'ML Models', 'Deployment', 'Communication'],
+        datasets: [{
+            label: 'Your Current Skills',
+            data: [65, 59, 70, 81, 56, 55],
+            fill: true,
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderColor: 'rgb(59, 130, 246)',
+            pointBackgroundColor: 'rgb(59, 130, 246)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(59, 130, 246)'
+        }, {
+            label: 'Target for ML Engineer',
+            data: [85, 70, 80, 90, 75, 70],
+            fill: true,
+            backgroundColor: 'rgba(209, 213, 219, 0.2)',
+            borderColor: 'rgb(107, 114, 128)',
+            pointBackgroundColor: 'rgb(107, 114, 128)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(107, 114, 128)'
+        }]
+    };
+    
+    let careerMeterChart = new Chart(ctx, {
+        type: 'radar',
+        data: initialData,
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    pointLabels: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#374151'
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 100
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+
+    const readinessSlider = document.getElementById('readiness-slider');
+    readinessSlider.addEventListener('input', (event) => {
+        const progress = event.target.value / 100;
+        const newData = initialData.datasets[0].data.map(val => Math.min(100, Math.round(val + (100 - val) * progress * 0.4)));
+        careerMeterChart.data.datasets[0].data = newData;
+        careerMeterChart.update();
+    });
+
+    // --- Gemini API Integration for AI Career Coach ---
+    let chatHistory = []; // Stores conversation history for context
+
+    async function callGeminiAPI(prompt) {
+        let currentChatHistory = chatHistory;
+        currentChatHistory.push({ role: "user", parts: [{ text: prompt }] });
+        const payload = { contents: currentChatHistory };
+        const apiKey = ""; // Canvas will automatically provide the API key
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Gemini API HTTP Error:", response.status, response.statusText, errorData);
+                return `API error: ${errorData.error?.message || 'Unknown error'}`;
+            }
+
+            const result = await response.json();
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                const text = result.candidates[0].content.parts[0].text;
+                chatHistory.push({ role: "model", parts: [{ text: text }] });
+                return text;
+            } else {
+                console.error("Gemini API returned an unexpected structure or no content:", result);
+                return "I'm sorry, I couldn't generate a response. Please try again with a different query.";
+            }
+        } catch (error) {
+            console.error("Error calling Gemini API:", error);
+            // This is where network errors like "IP wasn't found" would be caught
+            return "There was a network error or problem connecting to the AI. Please check your internet connection and try again.";
+        }
+    }
+
+    function appendMessage(sender, text) {
+        const chatBox = document.getElementById('chat-box');
+        if (!chatBox) return; // Ensure chatBox exists before appending
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${sender}`;
+        messageDiv.textContent = text;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
+    }
+
+    async function handleChatSubmit() {
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-chat-button');
+        const sendButtonText = document.getElementById('send-button-text');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        
+        if (!chatInput || !sendButton || !sendButtonText || !loadingSpinner) return; // Ensure elements exist
+
+        const userMessage = chatInput.value.trim();
+        if (userMessage === '') return;
+
+        appendMessage('user', userMessage);
+        chatInput.value = ''; // Clear input
+
+        sendButton.disabled = true;
+        sendButtonText.classList.add('hidden');
+        loadingSpinner.classList.remove('hidden');
+
+        const aiResponse = await callGeminiAPI(userMessage);
+        appendMessage('ai', aiResponse);
+
+        sendButton.disabled = false;
+        sendButtonText.classList.remove('hidden');
+        loadingSpinner.classList.add('hidden');
+    }
+
+    function initChatbot() {
+        const sendButton = document.getElementById('send-chat-button');
+        const chatInput = document.getElementById('chat-input');
+        if (sendButton && chatInput) {
+            sendButton.removeEventListener('click', handleChatSubmit); // Prevent duplicate listeners
+            chatInput.removeEventListener('keypress', handleChatKeyPress); // Prevent duplicate listeners
+            
+            sendButton.addEventListener('click', handleChatSubmit);
+            chatInput.addEventListener('keypress', handleChatKeyPress);
+        }
+    }
+
+    function handleChatKeyPress(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault(); // Prevent new line
+            handleChatSubmit();
+        }
+    }
+
+    // Call initChatbot initially if the Mentorship & Chatbot tab is the default one or becomes active.
+    // Since Project Hub is default, this will be called when Mentorship tab is clicked.
+    // If you want it active on load, you can check which tab is set as active initially and call initChatbot().
+    // For now, it correctly initializes when its tab is selected.
+});
+</script>
+</body>
+</html>
